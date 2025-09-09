@@ -25,7 +25,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Semgrep (SAST)
-        uses: rreturntocorp/semgrep-action@v3.11.0
+        uses: returntocorp/semgrep-action@v3.11.0
         with:
           config: auto
 
