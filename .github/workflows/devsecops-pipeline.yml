@@ -1,0 +1,51 @@
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Run Semgrep (SAST)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: auto
+
+      - name: Build Docker image
+        run: docker build -t flask-secure-app .
+
+      - name: Install Trivy (container scan)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Scan Docker image with Trivy
+        run: trivy image --format json --output trivy-report.json flask-secure-app
+
+      - name: Upload Trivy report
+        uses: actions/upload-artifact@v3
+        with:
+          name: trivy-report
+          path: trivy-report.json
