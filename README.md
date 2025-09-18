@@ -40,8 +40,3 @@ This project includes a GitHub Actions CI/CD pipeline that runs:
 
 4. Gunicorn + WSGI Setup (Production-Ready)
 Instead of using app.run(), the app uses a wsgi.py file to expose the Flask app via a WSGI interface.
-
-This setup is:
-    Safer for production
-    Recommended for Elastic Beanstalk
-    Complies with Flask deployment best practices
